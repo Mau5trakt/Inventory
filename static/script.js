@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
           //console.log(typeof(response))
             //console.log(response)
             var tratar = JSON.parse(response)
-            //console.log(tratar)
+            console.log(tratar)
             var tbody = document.getElementById('miTablaBody');
             // console.log(tratar)
 
@@ -32,13 +32,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 var celdaPrecioVenta = document.createElement('td')
 
 
+
+
                 celdaNombre.textContent = producto.nombre
                 celdaNumero.textContent = contador
+                celdaCategoria.textContent = producto.categoria
+                celdaCosto.textContent = producto.costo
+                celdaPrecioVenta.textContent = producto.precio_venta
+                celdaCantidad.textContent = producto.cantidad
+
                 contador++;
 
                 fila.appendChild(celdaNumero)
                 fila.appendChild(celdaNombre)
                 fila.appendChild(celdaCategoria)
+                fila.appendChild(celdaCantidad)
                 fila.appendChild(celdaCosto)
                 fila.appendChild(celdaPrecioVenta)
 
