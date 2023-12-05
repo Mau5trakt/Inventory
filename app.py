@@ -1,11 +1,24 @@
-from flask import Flask, render_template, request, jsonify
+import datetime
+from datetime import datetime
+
+from flask import Flask, render_template, request, jsonify, session
 from flask_paginate import Pagination, get_page_parameter, get_page_args
+from flask_session import Session
 from cs50 import SQL
+from werkzeug.security import generate_password_hash, check_password_hash
+from helpers import *
+from tempfile import mkdtemp
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+
+
 db = SQL("sqlite:///inventario.db")
+
+Session(app)
 
 productos = db.execute("SELECT * FROM PRODUCTOS")
 #users = list(range(100))
@@ -26,6 +39,7 @@ def after_request(response):
 
 
 @app.route('/')
+@login_required
 def index():
     page, per_page, offset = get_page_args(page_parameter='page',
                                            per_page_parameter='per_page')
@@ -41,12 +55,42 @@ def index():
                            pagination=pagination,
                            )
 
-@app.route("/search", methods=["GET", "POST"])
+@app.route("/search", methods=["POST"])
 def buscar():
     search_term = request.form.get('search_term', '')
     filtered_products = filter_products(search_term)
     return jsonify(filtered_products)
     #return render_template(, products=filtered_products)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    year = datetime.now().year
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if not request.form.get("username"):
+            return apology("Introduzca un nombre de usuario")
+
+        if not request.form.get("password"):
+            return apology("Introduzca una contraseña")
+
+        validation = db.execute("SELECT * FROM admin WHERE username =?", username)
+
+
+        if len(validation) != 1 or not check_password_hash(validation[0]["hash"], password):
+            return apology("Clave o Usuario Incorrecto")
+
+        session["username"] = validation[0]["username"]
+
+        print(session["username"])
+
+        return redirect("/")
+
+
+
+    return render_template("login.html", year=year, )
+
 
 if __name__ == '__main__':
     app.run()
