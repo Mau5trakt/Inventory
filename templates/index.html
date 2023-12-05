@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</head>
+<body>
+<h1> Inicio </h1>
+    <div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="input-group input-group-sm">
+        <input id="searchInput" class="form-control" type="search" placeholder="Search" aria-label="Search">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+    <div class="container">
+      {{ pagination.links }}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Producto </th>
+              <th>Categoria </th>
+              <th>Cantidad </th>
+              <th>Costo </th>
+              <th>Precio de venta </th>
+
+
+            </tr>
+          </thead>
+          <tbody id="miTablaBody">
+            {% for p in products %}
+            <tr>
+              <td>{{ loop.index + (page - 1) * per_page }} </td>
+
+              <td id="nombre">{{ p["nombre"] }}  </td>
+              <td>{{ p["categoria"] }}  </td>
+              <td>{{ p["cantidad"] }}  </td>
+              <td>{{ p["costo"] }}  </td>
+              <td>{{ p["precio_venta"] }}  </td>
+
+
+            </tr>
+            {% endfor %}
+          </tbody >
+        </table>
+      </div>
+      {{ pagination.links }}
+    </div>
+    <script src="../static/script.js"></script>
+
+
+
+
+  </body>
+</html>
