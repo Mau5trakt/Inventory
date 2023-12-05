@@ -1,9 +1,6 @@
 from cs50 import SQL
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 db = SQL("sqlite:///inventario.db")
 
-
-productos = db.execute("SELECT * FROM PRODUCTOS")
-
-for producto in productos:
-    print(producto)
