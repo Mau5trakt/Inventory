@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="icon"  type="image/x-icon" href="../static/icon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</head>
+<body class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+
+  <main class="form-signin">
+
+    <form action="/login" method="POST" style="max-width: 400px;">
+      <img class="mb-4" src="../static/recorte.jpeg" width="72" height="57">
+       {% if get_flashed_messages() %}
+            <div class="alert alert-primary mb-0 text-center" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+            </div>
+        {% endif %}
+      <h1 class="h3 mb-3 fw-normal">Panel Admin Inicio de Sesion</h1>
+
+      <div class="form-floating mb-2">
+        <input type="text" name="username" class="form-control form-control-sm" id="floatingInput" placeholder="Username">
+        <label for="floatingInput">Nombre de usuario</label>
+      </div>
+      <div class="form-floating mb-2">
+        <input type="password"  name="password" class="form-control form-control-sm" id="floatingPassword" placeholder="Contraseña">
+        <label for="floatingPassword">Password</label>
+      </div>
+
+
+      <button class="w-100 btn btn-sm btn-primary" type="submit">Iniciar Sesion</button>
+      <p class="mt-5 mb-3 text-muted">&copy; Enrique Alemany {{ year }}</p>
+    </form>
+  </main>
+
+</body>
+
+
+</html>
