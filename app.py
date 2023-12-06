@@ -20,14 +20,10 @@ db = SQL("sqlite:///inventario.db")
 
 Session(app)
 
-productos = db.execute("SELECT * FROM PRODUCTOS")
+
 #users = list(range(100))
 
-def get_products(offset=0, per_page=30):
-    return productos[offset: offset + per_page]
 
-def filter_products(search_term):
-    return [p for p in productos if search_term.lower() in p["nombre"].lower()]
 
 @app.after_request
 def after_request(response):
@@ -41,6 +37,14 @@ def after_request(response):
 @app.route('/')
 @login_required
 def index():
+    productos = db.execute("SELECT * FROM PRODUCTOS")
+    def get_products(offset=0, per_page=30):
+        return productos[offset: offset + per_page]
+
+    def filter_products(search_term):
+        return [p for p in productos if search_term.lower() in p["nombre"].lower()]
+
+
     nav_links = [{"nombre": "Inventario", "ruta": "/"}, {"nombre": "Agregar Productos", "ruta":"/agregar-productos"}, {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
     page, per_page, offset = get_page_args(page_parameter='page',
                                            per_page_parameter='per_page')
@@ -60,7 +64,7 @@ def index():
 @app.route("/search", methods=["POST"])
 def buscar():
     search_term = request.form.get('search_term', '')
-    filtered_products = filter_products(search_term)
+    filtered_products = db.execute("SELECT * FROM productos WHERE nombre LIKE '%' || ? || '%' ", (search_term,)) #filter_products(search_term)
     return jsonify(filtered_products)
     #return render_template(, products=filtered_products)
 
@@ -92,6 +96,45 @@ def login():
 
 
     return render_template("login.html", year=year, )
+
+@app.route("/agregar-productos", methods=["GET", "POST"])
+def agregar_producto():
+    nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+                 {"nombre": "Inventario", "ruta": "/"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+
+    if request.method == "POST":
+
+        nombre = request.form.get("nombre")
+        cantidad = request.form.get("cantidad")
+        costo = request.form.get("costo")
+        precio_venta = request.form.get("precio-venta")
+        categoria = request.form.get("categoria")
+
+
+
+        try:
+            cantidad = int(cantidad)
+        except:
+            return apology("Numeros decimales no permitidos")
+
+        try:
+            precio_venta = float(precio_venta)
+        except:
+            return apology("Precio no permitido")
+
+        try:
+            costo = float(costo)
+        except:
+            return apology("Precio no permitido")
+
+        if not nombre:
+            return apology("Introduzca nombre del producto")
+
+        db.execute("INSERT INTO productos(nombre, cantidad, precio_venta, costo, categoria) VALUES (?, ?, ?, ?, ?)", nombre, cantidad, precio_venta, costo, categoria)
+
+
+    return render_template("agregar-producto.html", nav_links=nav_links)
 
 @app.route("/logout")
 def logout():
