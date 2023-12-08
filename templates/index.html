@@ -28,6 +28,11 @@
               <th>Cantidad </th>
               <th>Costo </th>
               <th>Precio de venta </th>
+              <th>Ganancia neta </th>
+              <th>Porcentaje ganancia </th>
+              <th>Ganancia potencial </th>
+              <th> </th>
+
 
 
             </tr>
@@ -42,6 +47,16 @@
               <td>{{ p["cantidad"] }}  </td>
               <td>{{ p["costo"] }}  </td>
               <td>{{ p["precio_venta"] }}  </td>
+              <td>{{ p["ganancia_neta"]| round(2) }}  </td>
+              <td>{{ p["porcentaje_ganancia"]| round(2) }}% </td>
+              <td>{{ p["ganancia_potencial"]| round(2) }} </td>
+
+              <td>
+                  <button type="button" class="btn btn-link"><a href="/editar-producto/{{ p['producto_id'] }}">Editar</a></button>
+              </td>
+
+            <td><button type="button" class="btn btn-outline-success">Agregar</button> </td>
+
 
 
             </tr>
