@@ -19,7 +19,7 @@
     <div class="container">
       {{ pagination.links }}
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover" id="tabla">
           <thead>
             <tr>
               <th>#</th>
@@ -55,7 +55,7 @@
                   <button type="button" class="btn btn-link"><a href="/editar-producto/{{ p['producto_id'] }}">Editar</a></button>
               </td>
 
-            <td><button type="button" class="btn btn-outline-success">Agregar</button> </td>
+            <td><button type="button" class="btn btn-outline-success" onclick="agregarCarrito()" >Agregar</button> </td>
 
 
 
@@ -66,5 +66,7 @@
       </div>
       {{ pagination.links }}
     </div>
+
     <script src="../static/script.js"></script>
+    <script src="../static/carrito.js"></script>
 {% endblock %}
