@@ -1,0 +1,26 @@
+.d-flex {
+  position: relative;
+}
+
+.contenedor {
+  width: 300px;
+  height: 300px;
+  overflow-y:auto ;
+  background-color: #ffffff;
+  padding: 10px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  display: none;
+  border: solid 1px black;
+}
+
+.mostrar {
+  display: block;
+}
+
+td > input{
+  border: 1px solid red;
+  width: 45px;
+}
