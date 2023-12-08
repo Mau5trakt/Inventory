@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 var celdaCategoria = document.createElement('td')
                 var celdaCosto = document.createElement('td')
                 var celdaPrecioVenta = document.createElement('td')
+                var celdaGananciaNeta = document.createElement('td')
+                var celdaPorcentajeGanancia = document.createElement('td')
+                var celdaGananciaPotencial = document.createElement('td')
 
 
 
@@ -40,6 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 celdaCosto.textContent = producto.costo
                 celdaPrecioVenta.textContent = producto.precio_venta
                 celdaCantidad.textContent = producto.cantidad
+                celdaGananciaNeta.textContent = producto.ganancia_neta.toFixed(2)
+
+                celdaPorcentajeGanancia.textContent = `${producto.porcentaje_ganancia.toFixed(2)}%`
+
+
+                celdaGananciaPotencial.textContent = producto.ganancia_potencial.toFixed(2)
 
                 contador++;
 
@@ -49,6 +58,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 fila.appendChild(celdaCantidad)
                 fila.appendChild(celdaCosto)
                 fila.appendChild(celdaPrecioVenta)
+                fila.appendChild(celdaGananciaNeta)
+                fila.appendChild(celdaPorcentajeGanancia)
+                fila.appendChild(celdaGananciaPotencial)
+
+
 
                 tbody.appendChild(fila)
 
