@@ -37,7 +37,7 @@ def after_request(response):
 @app.route('/')
 @login_required
 def index():
-    productos = db.execute("SELECT * FROM PRODUCTOS")
+    productos = db.execute("SELECT *,precio_venta - costo as ganancia_neta,(precio_venta - costo) * cantidad as ganancia_potencial, (precio_venta / productos.costo) * 100 as porcentaje_ganancia FROM PRODUCTOS")
     def get_products(offset=0, per_page=30):
         return productos[offset: offset + per_page]
 
@@ -64,7 +64,7 @@ def index():
 @app.route("/search", methods=["POST"])
 def buscar():
     search_term = request.form.get('search_term', '')
-    filtered_products = db.execute("SELECT * FROM productos WHERE nombre LIKE '%' || ? || '%' ", (search_term,)) #filter_products(search_term)
+    filtered_products = db.execute("SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, (precio_venta / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE nombre LIKE '%' || ? || '%' ", (search_term,)) #filter_products(search_term)
     return jsonify(filtered_products)
     #return render_template(, products=filtered_products)
 
