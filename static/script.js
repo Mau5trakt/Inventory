@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
             var tratar = JSON.parse(response)
             console.log(tratar)
             var tbody = document.getElementById('miTablaBody');
+            tbody.innerHTML = '';
             // console.log(tratar)
+            window.elementos = tratar;
 
           document.querySelector('tbody').innerHTML = '';
             var contador = 1;
@@ -33,6 +35,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 var celdaGananciaNeta = document.createElement('td')
                 var celdaPorcentajeGanancia = document.createElement('td')
                 var celdaGananciaPotencial = document.createElement('td')
+                var celdaEditar = document.createElement('td')
+                var celdaAgregar = document.createElement("td")
+
+                // Boton de editar producto
+                var link = document.createElement('a')
+                link.href=`/editar-producto/${producto.producto_id}`
+                link.textContent = "Editar"
+                var button = document.createElement("button")
+                button.classList.add("btn", "btn-link")
+                button.setAttribute("type", "button")
+
+
+                //Boton para añadir al carrito
+                var botonagregar = document.createElement("button")
+                botonagregar.classList.add("btn", "btn-outline-success")
+                botonagregar.setAttribute("type", "button")
+
+                botonagregar.setAttribute("onclick", `agregarCarrito(${contador})`)
+                botonagregar.textContent = "Agregar"
+
+
+
 
 
 
@@ -46,9 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 celdaGananciaNeta.textContent = producto.ganancia_neta.toFixed(2)
 
                 celdaPorcentajeGanancia.textContent = `${producto.porcentaje_ganancia.toFixed(2)}%`
-
-
                 celdaGananciaPotencial.textContent = producto.ganancia_potencial.toFixed(2)
+
+                button.appendChild(link)
 
                 contador++;
 
@@ -62,10 +86,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 fila.appendChild(celdaPorcentajeGanancia)
                 fila.appendChild(celdaGananciaPotencial)
 
+                celdaEditar.appendChild(button)
+                fila.appendChild(celdaEditar)
+
+                celdaAgregar.appendChild(botonagregar)
+                fila.appendChild(celdaAgregar)
+
 
 
                 tbody.appendChild(fila)
-
 
             })
 
