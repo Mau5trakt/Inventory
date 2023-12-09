@@ -98,6 +98,7 @@ def login():
     return render_template("login.html", year=year, )
 
 @app.route("/agregar-productos", methods=["GET", "POST"])
+@login_required
 def agregar_producto():
     nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
                  {"nombre": "Inventario", "ruta": "/"},
