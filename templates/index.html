@@ -47,9 +47,29 @@
               <td>{{ p["cantidad"] }}  </td>
               <td>{{ p["costo"] }}  </td>
               <td>{{ p["precio_venta"] }}  </td>
+
+              {% if p["ganancia_neta"] is none %}
+                <td>{{ p["ganancia_neta"] }}  </td>
+              {% else %}
               <td>{{ p["ganancia_neta"]| round(2) }}  </td>
-              <td>{{ p["porcentaje_ganancia"]| round(2) }}% </td>
-              <td>{{ p["ganancia_potencial"]| round(2) }} </td>
+               {% endif %}
+
+
+              {% if p["porcentaje_ganancia"] is none %}
+                <td>{{ p["porcentaje_ganancia"] }}  </td>
+              {% else %}
+              <td>{{ p["porcentaje_ganancia"]| round(2) }}%  </td>
+               {% endif %}
+
+
+                {% if p["ganancia_potencial"] is none %}
+                <td>{{ p["ganancia_potencial"] }}  </td>
+              {% else %}
+              <td>{{ p["ganancia_potencial"]| round(2) }}  </td>
+               {% endif %}
+
+
+
 
               <td>
                   <button type="button" class="btn btn-link"><a href="/editar-producto/{{ p['producto_id'] }}">Editar</a></button>
