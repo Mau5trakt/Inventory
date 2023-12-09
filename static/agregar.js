@@ -21,7 +21,7 @@
         const precioVenta = parseFloat(precioVentaInput.value) || 0;
 
         const gananciaNeta = precioVenta - costo;
-        const porcentajeGanancia = (gananciaNeta / costo) * 100;
+        const porcentajeGanancia = ((precioVenta  - costo) / costo) * 100;
         porcentajeInput.value = porcentajeGanancia.toFixed(2) + '%';
     }
 
