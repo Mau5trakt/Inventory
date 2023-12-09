@@ -34,25 +34,19 @@
 
           {% endfor %}
       </ul>
-        <div class="d-flex p-3">
+        <div class="d-flex p-3" id="carritoContainer">
 
-            <a href="#" class="nav-link" onclick="toggleCarrito()"> <i class="fa-solid fa-cart-shopping"></i> Carrito </a>
-            <div id="carritoDiv" class="contenedor"> Carrito Actual
-                <table class="table table-hover" id="carrito">
+
+
+            <div id="carritoDiv" class="contenedor"> Carrito Actual <button type="button" class="btn btn-danger" onclick="eliminarCarrito()">Borrar Carrito</button>
+                <table class="table table-hover" id="carritoTable">
                     <tr>
                         <th> # </th>
                         <th> Elemento </th>
                         <th> Cantidad </th>
                     </tr>
                     <tbody>
-                    <td> a </td>
-                    <td> Nombre de un producto </td>
-                    <td>
-                        <input type="number" name="" id="" min="1">
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-link"><a href="#">Eliminar</a></button>
-                    </td>
+
                     </tbody>
                 </table>
 
