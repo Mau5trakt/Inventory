@@ -37,7 +37,7 @@ def after_request(response):
 @app.route('/')
 @login_required
 def index():
-    productos = db.execute("SELECT *,precio_venta - costo as ganancia_neta,(precio_venta - costo) * cantidad as ganancia_potencial, (precio_venta / productos.costo) * 100 as porcentaje_ganancia FROM PRODUCTOS")
+    productos = db.execute("SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia  FROM PRODUCTOS")
     def get_products(offset=0, per_page=30):
         return productos[offset: offset + per_page]
 
@@ -64,7 +64,7 @@ def index():
 @app.route("/search", methods=["POST"])
 def buscar():
     search_term = request.form.get('search_term', '')
-    filtered_products = db.execute("SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, (precio_venta / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE nombre LIKE '%' || ? || '%' ", (search_term,)) #filter_products(search_term)
+    filtered_products = db.execute("SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia  FROM productos WHERE nombre LIKE '%' || ? || '%' ", (search_term,)) #filter_products(search_term)
     return jsonify(filtered_products)
     #return render_template(, products=filtered_products)
 
@@ -136,6 +136,42 @@ def agregar_producto():
 
 
     return render_template("agregar-producto.html", nav_links=nav_links)
+
+@app.route("/editar-producto/<int:id>", methods=["GET", "POST"])
+@login_required
+def editar_producto(id):
+    nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+                 {"nombre": "Inventario", "ruta": "/"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+    producto = db.execute("SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE producto_id = ?", id)[0]
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre")
+        costo = request.form.get("costo")
+        precio_venta = request.form.get("precio-venta")
+        categoria = request.form.get("categoria")
+
+
+        try:
+            precio_venta = float(precio_venta)
+        except:
+            return apology("Precio no permitido")
+
+        try:
+            costo = float(costo)
+        except:
+            return apology("Precio no permitido")
+
+        if not nombre:
+            return apology("Introduzca nombre del producto")
+
+        db.execute("UPDATE productos SET nombre = ?, precio_venta = ?, costo = ?, categoria =? WHERE producto_id = ?",
+                   nombre, precio_venta, costo, categoria, id)
+
+        return redirect(f"/editar-producto/{producto['producto_id']}")
+
+    return render_template("editar-producto.html", producto=producto, nav_links=nav_links)
+
 
 @app.route("/logout")
 def logout():
