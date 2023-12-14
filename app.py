@@ -172,6 +172,13 @@ def editar_producto(id):
 
     return render_template("editar-producto.html", producto=producto, nav_links=nav_links)
 
+@app.route("/checkout", methods=["GET", "POST"])
+@login_required
+def checkout():
+    print("In checkout ")
+
+    return render_template("checkout.html")
+
 
 @app.route("/logout")
 def logout():
