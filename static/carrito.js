@@ -22,21 +22,39 @@ function agregarCarrito(id) {
 
 
 
+
   let carrito = JSON.parse(localStorage.getItem('Carrito')) || [];
 
 
 
   const elementoExistente = carrito.find(item => item.elemento === elemento);
 
-  //let total = quantity(elemento)
-  if (elementoExistente) {
-    // Si ya existe, actualizar la cantidad
 
-    elementoExistente.cantidad += 1;
+
+  if (elementoExistente) {
+
+      if (elementoExistente.cantidad + 1 > disponibles){
+          alert(`No hay suficiente stock de ${elemento}`)
+
+      }
+
+      else{
+        elementoExistente.cantidad += 1;
+      }
+
+
   } else {
+      if (disponibles === 0){
+          alert(`No hay stock de ${elemento}`)
+      }
+
+      else{
+        cantidad = 1;
+        carrito.push({ elemento, cantidad, disponibles, pventa});
+      }
     // Si no existe, agregar un nuevo objeto al carrito
-    cantidad = 1;
-    carrito.push({ elemento, cantidad, disponibles, pventa});
+
+
 
   }
 
