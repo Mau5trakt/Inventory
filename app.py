@@ -181,7 +181,7 @@ def editar_producto(id):
 def checkout():
     print("In checkout ")
 
-    return render_template("checkout.html")
+    return render_template("pago.html")
 
 
 @app.route("/logout")
