@@ -14,12 +14,21 @@ function toggleCarrito() {
 }
 
 function agregarCarrito(id) {
-  var elemento = window.elementos[id - 1]["nombre"];
+  let elemento = window.elementos[id - 1]["nombre"];
+  let disponibles = window.elementos[id - 1]["cantidad"]
+  let pventa =  window.elementos[id - 1]["precio_venta"]
+  console.log(`elemento: ${elemento}`)
+
+
+
 
   let carrito = JSON.parse(localStorage.getItem('Carrito')) || [];
 
+
+
   const elementoExistente = carrito.find(item => item.elemento === elemento);
 
+  //let total = quantity(elemento)
   if (elementoExistente) {
     // Si ya existe, actualizar la cantidad
 
@@ -27,7 +36,8 @@ function agregarCarrito(id) {
   } else {
     // Si no existe, agregar un nuevo objeto al carrito
     cantidad = 1;
-    carrito.push({ elemento, cantidad });
+    carrito.push({ elemento, cantidad, disponibles, pventa});
+
   }
 
   localStorage.setItem("Carrito", JSON.stringify(carrito));
