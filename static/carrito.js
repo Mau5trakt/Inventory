@@ -17,7 +17,7 @@ function agregarCarrito(id) {
   let elemento = window.elementos[id - 1]["nombre"];
   let disponibles = window.elementos[id - 1]["cantidad"]
   let pventa =  window.elementos[id - 1]["precio_venta"]
-  console.log(`elemento: ${elemento}`)
+
 
 
 
@@ -34,7 +34,14 @@ function agregarCarrito(id) {
   if (elementoExistente) {
 
       if (elementoExistente.cantidad + 1 > disponibles){
-          alert(`No hay suficiente stock de ${elemento}`)
+
+          Swal.fire({
+            icon: "error",
+            title: "Cantidad insuficiente en inventario",
+            text: `No hay suficiente stock de ${elemento}`,
+
+          });
+
 
       }
 
@@ -45,7 +52,12 @@ function agregarCarrito(id) {
 
   } else {
       if (disponibles === 0){
-          alert(`No hay stock de ${elemento}`)
+          Swal.fire({
+            icon: "error",
+            title: "Cantidad insuficiente en inventario",
+            text: `No hay suficiente stock de ${elemento}`,
+
+          });
       }
 
       else{
@@ -146,7 +158,7 @@ function eliminarElemento(boton){
 
 function valorCarrito() {
     let carrito = JSON.parse(localStorage.getItem('Carrito')) || [];
-    console.log(carrito.length);
+
 
     // Obtén el elemento <a> existente si ya fue creado
     let aCarrito = document.getElementById("textoCarrito");
