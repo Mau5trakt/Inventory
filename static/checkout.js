@@ -17,3 +17,30 @@
     }, false)
   })
 })()
+
+function deliverySwitch(){
+
+  const radioLocal = document.getElementById('local')
+  const radioDelivery = document.getElementById('delivery')
+  const inputDelivery = document.getElementById('inputDelivery')
+
+  inputDelivery.value = 0;
+
+  radioLocal.addEventListener('change', function () {
+    if (radioLocal.checked) {
+
+      inputDelivery.disabled = true;
+      inputDelivery.value = 0;
+    }
+  });
+
+  radioDelivery.addEventListener('change', function (){
+    if (radioDelivery.checked){
+      inputDelivery.disabled = false;
+    }
+  });
+
+}
+
+
+window.onload = deliverySwitch()
