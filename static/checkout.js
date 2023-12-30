@@ -42,5 +42,6 @@ function deliverySwitch(){
 
 }
 
+//Just call the function lmao
 
-window.onload = deliverySwitch()
+deliverySwitch()
