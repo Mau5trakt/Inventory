@@ -65,12 +65,15 @@ function cartRenderize(){
 
     //attributes
     li.classList.add("list-group-item", "d-flex", "justify-content-between", "lh-sm")
+    li.id = "product"
     nombre.classList.add("my-0")
     nombre.textContent = articulo.elemento
     small.classList.add("text-body-secondary")
     eliminar.href = "#"
     eliminar.textContent = "Eliminar"
-    eliminar.addEventListener("click", deleteItem)
+    eliminar.addEventListener("click", function () {
+      deleteItem(this)
+    })
     price.classList.add("text-body-secondary")
     price.textContent = `$${(articulo.pventa * articulo.cantidad).toFixed(2)}`
 
@@ -106,14 +109,42 @@ function cartRenderize(){
   }
 
 
-total.textContent = `$ ${cuenta.toString()}`
+total.textContent = `$ ${cuenta.toFixed(2).toString()}`
 }
 
 function changeQty(){
   console.log("it's going to be modified")
 }
 
-function deleteItem(){
+function deleteItem(element){
+  let div = (element.parentNode.parentNode)
+
+  let nombre = div.querySelector("h6").textContent
+
+  //
+  let carrito = JSON.parse(localStorage.getItem('Carrito')) || [];
+
+
+  //console.log(parentNode)
+  console.log(carrito)
+
+  let indexProduct = carrito.findIndex(product => product.elemento === nombre)
+  if (indexProduct !== -1)
+  {
+    carrito.splice(indexProduct, 1)
+    localStorage.setItem('Carrito', JSON.stringify(carrito))
+    let products = document.querySelectorAll("#product")
+
+    for (let product of products)
+    {
+      product.remove()
+
+    }
+
+    cartRenderize()
+
+  }
+
 
 }
 
