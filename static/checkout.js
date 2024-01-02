@@ -70,6 +70,7 @@ function cartRenderize(){
     small.classList.add("text-body-secondary")
     eliminar.href = "#"
     eliminar.textContent = "Eliminar"
+    eliminar.addEventListener("click", deleteItem)
     price.classList.add("text-body-secondary")
     price.textContent = `$${(articulo.pventa * articulo.cantidad).toFixed(2)}`
 
@@ -78,7 +79,7 @@ function cartRenderize(){
     price.id = "priceItem"
     input.type ="text"
     input.value = articulo.cantidad
-    input.addEventListener("input", changeqty)
+    input.addEventListener("input", changeQty)
 
     //making the element
     small.insertAdjacentElement("beforeend", eliminar)
@@ -108,7 +109,13 @@ function cartRenderize(){
 total.textContent = `$ ${cuenta.toString()}`
 }
 
+function changeQty(){
+  console.log("it's going to be modified")
+}
 
+function deleteItem(){
+
+}
 
 //Just call the function lmao
 cartRenderize()
