@@ -1,3 +1,17 @@
 .container {
   max-width: 960px;
 }
+
+#inputQty{
+  transition: 0.4s ease-in;
+
+}
+
+.invalid-input{
+  border: 2px solid red;
+  background-color: #eb5b5b ;
+}
+
+.invalid-qty{
+  background-color: #ffe181;
+}
