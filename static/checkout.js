@@ -18,18 +18,21 @@
   })
 })()
 
+const conversion = 37;
+
 function deliverySwitch(){
 
   const radioLocal = document.getElementById('local')
   const radioDelivery = document.getElementById('delivery')
   const inputDelivery = document.getElementById('inputDelivery')
 
-  inputDelivery.value = 0;
+  inputDelivery.value = 100;
 
   radioLocal.addEventListener('change', function () {
     if (radioLocal.checked) {
 
       inputDelivery.disabled = true;
+      //Delete the delivery span also
       inputDelivery.value = 0;
     }
   });
@@ -37,6 +40,84 @@ function deliverySwitch(){
   radioDelivery.addEventListener('change', function (){
     if (radioDelivery.checked){
       inputDelivery.disabled = false;
+
+        //Set a default in the price to make more easy
+
+        let li = document.createElement("li")
+        li.classList.add("list-group-item", "d-flex", "justify-content-between")
+        li.id = "deliveryPrice"
+
+        let spanName = document.createElement("span")
+        spanName.textContent = "Delivery"
+
+        let spanPrice = document.createElement("span")
+        spanPrice.id = "priceItem"
+        spanPrice.classList.add("text-body-secondary")
+
+        let pconvertido = (inputDelivery.value / conversion).toFixed(2)
+        console.log(pconvertido, "pconvertido")
+        spanPrice.textContent = pconvertido.toString()
+
+        //get the element with the total price
+        let liTotal = document.getElementById("liTotal")
+        // before Litotal i gotta insert the delivery price element
+
+        li.insertAdjacentElement("afterbegin", spanName)
+        li.insertAdjacentElement("beforeend", spanPrice)
+        //
+        /*
+        * li -> span.Delivery, spanPrice
+        * */
+        liTotal.insertAdjacentElement("beforebegin", li)
+
+        let products = document.querySelectorAll("#product")
+        //Refactor this, eventually...
+        let cuenta = 0;
+        for (let p of products)
+                {
+                    let priceRow = p.querySelector("span")
+                    //cuenta += priceRow.textContent
+                    console.log(priceRow.textContent)
+                    let priceConverted = parseFloat(priceRow.textContent.replace("$", ""))
+
+                    cuenta += priceConverted
+
+
+                }
+
+        cuenta += parseFloat(pconvertido)
+        document.querySelector("#total").textContent = cuenta.toFixed(2)
+
+
+
+
+
+
+
+        //^^ With this i have to add automatically the span for the delivery
+
+        //vv With that i have to actualize the value and the total in the checkout
+
+
+      inputDelivery.addEventListener("input", () => {
+
+           if (!/^\d+$/.test(inputDelivery2.value))
+        {
+            //Later...
+            Swal.fire({
+                        icon: "error",
+                        title: "Cantidad Invalida",
+                        text: "Introduzca una cantidad numerica"
+            });
+        }
+
+
+        console.log(inputDelivery.value)
+        console.log("cambioooo3")
+
+
+      })
+
     }
   });
 
