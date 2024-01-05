@@ -12,6 +12,9 @@
         event.preventDefault()
         event.stopPropagation()
       }
+      else{
+          //here i can send the values to the backend
+      }
 
       form.classList.add('was-validated')
     }, false)
@@ -34,12 +37,23 @@ function deliverySwitch(){
       inputDelivery.disabled = true;
       //Delete the delivery span also
       inputDelivery.value = 0;
+
+      //Eliminate the delivery value and re-do the account
+        let lista = document.getElementById("begin")
+        let delivery = document.getElementById("deliveryPrice")
+
+        lista.removeChild(delivery)
+
+        console.log(lista)
+
     }
   });
 
   radioDelivery.addEventListener('change', function (){
     if (radioDelivery.checked){
+
       inputDelivery.disabled = false;
+
 
         //Set a default in the price to make more easy
 
@@ -101,20 +115,51 @@ function deliverySwitch(){
 
       inputDelivery.addEventListener("input", () => {
 
-           if (!/^\d+$/.test(inputDelivery2.value))
+           if (!/^\d+$/.test(inputDelivery.value))
         {
             //Later...
             Swal.fire({
                         icon: "error",
                         title: "Cantidad Invalida",
-                        text: "Introduzca una cantidad numerica"
+                        text: "Introduzca una cantidad numérica"
             });
         }
+           else{
+               let liDeliver = document.getElementById("deliveryPrice")
+               let deliverPrice = liDeliver.querySelector("#priceItem")
+               console.log(deliverPrice, "333")
 
+               deliverPrice.textContent = ""
+
+               let p =  parseFloat(inputDelivery.value)
+               let priceFloat = (p / 37).toFixed(2) //Gotta improve this, i feel like yanderedev
+
+               deliverPrice.textContent = priceFloat.toString()
+
+
+               // only actualize the values
+
+
+               let products1 = document.querySelectorAll("#product")
+                //Refactor this, eventually...
+                let cuenta = 0;
+                for (let p of products1)
+                {
+                    let priceRow = p.querySelector("span")
+                    //cuenta += priceRow.textContent
+                    console.log(priceRow.textContent)
+                    let priceConverted = parseFloat(priceRow.textContent.replace("$", ""))
+
+                    cuenta += priceConverted
+
+
+                }
+
+        cuenta += priceFloat
+        document.querySelector("#total").textContent = cuenta.toFixed(2)
+           }
 
         console.log(inputDelivery.value)
-        console.log("cambioooo3")
-
 
       })
 
