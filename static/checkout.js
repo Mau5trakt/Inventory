@@ -155,7 +155,7 @@ function deliverySwitch(){
 
                 }
 
-        cuenta += priceFloat
+        cuenta +=  Number(priceFloat)
         document.querySelector("#total").textContent = cuenta.toFixed(2)
            }
 
