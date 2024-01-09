@@ -4,17 +4,109 @@
 
   // Fetch all the forms we want to apply custom Bootstrap validation styles to
   const forms = document.querySelectorAll('.needs-validation')
-
+  let carrito = JSON.parse(localStorage.getItem('Carrito'))
   // Loop over them and prevent submission
   Array.from(forms).forEach(form => {
     form.addEventListener('submit', event => {
-      if (!form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-      else{
-          //here i can send the values to the backend
-      }
+        if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+        } else if (carrito.length === 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Carrito Invalido",
+                text: "Introduzca productos para facturar"
+            });
+        } else {
+            //here i can send the values to the backend
+            //need a transaction object
+            let nombre = document.getElementById("firstName").value;
+            let apellido = document.getElementById("lastName").value;
+            let email = document.getElementById("email").value;
+            let direccion = document.getElementById("address").value;
+
+            let radios_pago = document.querySelectorAll('input[name="pago"]');
+            let forma_pago
+            radios_pago.forEach(function (radio) {
+                if (radio.checked) {
+                    forma_pago = radio.id;
+                }
+            })
+
+            let radios_entrega = document.querySelectorAll('input[name="entrega"]');
+            let forma_entrega
+            radios_entrega.forEach(function (radio) {
+                if (radio.checked) {
+                    forma_entrega = radio.id;
+                }
+            })
+            console.log(forma_pago)
+            console.log(forma_entrega)
+            let delivery_value
+            if (forma_entrega === "delivery") {
+                let delivery_input = document.getElementById("inputDelivery");
+                delivery_value = parseFloat(delivery_input.value)
+            } else {
+                delivery_value = 0.00
+            }
+
+            let transaccion = {
+                cliente: `${nombre} ${apellido}`,
+                correo: email,
+                direccion: direccion,
+                forma_pago: forma_pago,
+                entrega: forma_entrega,
+                delivery: delivery_value
+            }
+            //productos = []
+            let products_list = [];
+            //producto = {}
+            //gotta create a new product then push into products
+
+            let productos = document.querySelectorAll("#product")
+            productos.forEach(function (producto) {
+                let nombre = producto.querySelector("h6").textContent
+                let qty = producto.querySelector("input").value
+                let price = producto.querySelector("#priceItem").textContent
+
+                let producto_insert = {nombre: nombre, cantidad: Number(qty), total: Number(price.replace("$", ""))}
+                products_list.push(producto_insert)
+            });
+            console.log(transaccion)
+            console.log(products_list)
+            let data = {transaccion: transaccion, products_list: products_list};
+            let url = "/procesar_orden";
+            if(document.getElementById("invalid-qty") || document.getElementById("error-alert")){
+                Swal.fire({
+        icon: "error",
+        title: "Inputs Invalidos",
+        text: "Revise los valores introducidos "
+            });
+                event.preventDefault()
+            event.stopPropagation()
+            }
+    else{
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)  // Convertir el objeto a cadena JSON
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("js sent", data);
+
+                })
+                .catch(error => {
+                    console.log("Error en la solicitud", error);
+                    console.log(data);
+                    console.log(JSON.stringify(data));
+                });
+            event.preventDefault()
+            event.stopPropagation()
+        }
+    }
 
       form.classList.add('was-validated')
     }, false)
