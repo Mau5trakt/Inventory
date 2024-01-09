@@ -105,6 +105,12 @@
                 });
             event.preventDefault()
             event.stopPropagation()
+                localStorage.clear()
+                Swal.fire({
+                            icon: "success",
+                            title: "Compra hecha con exito",
+                            footer: '<a href="/">Inicio</a>'
+});
         }
     }
 
