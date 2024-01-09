@@ -69,7 +69,7 @@
                 let qty = producto.querySelector("input").value
                 let price = producto.querySelector("#priceItem").textContent
 
-                let producto_insert = {nombre: nombre, cantidad: Number(qty), total: Number(price.replace("$", ""))}
+                let producto_insert = {nombre: nombre, cantidad: Number(qty), total: Number(price.replace("$", "")).toFixed(2)}
                 products_list.push(producto_insert)
             });
             console.log(transaccion)
