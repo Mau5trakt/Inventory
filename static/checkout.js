@@ -5,19 +5,39 @@
   // Fetch all the forms we want to apply custom Bootstrap validation styles to
   const forms = document.querySelectorAll('.needs-validation')
   let carrito = JSON.parse(localStorage.getItem('Carrito'))
+    let contador = 0;
   // Loop over them and prevent submission
   Array.from(forms).forEach(form => {
     form.addEventListener('submit', event => {
-        if (!form.checkValidity()) {
+        if (!form.checkValidity())
+        {
             event.preventDefault()
             event.stopPropagation()
-        } else if (carrito.length === 0) {
+        }
+        else if (carrito.length === 0)
+        {
             Swal.fire({
                 icon: "error",
                 title: "Carrito Invalido",
                 text: "Introduzca productos para facturar"
             });
-        } else {
+        }
+
+        else if (contador > 0)
+        {
+            Swal.fire({
+                icon: "warning",
+                title: "Orden duplicada",
+                text: "Esta intentando introducir una orden que ya fue facturada",
+                footer: '<a href="/">Inicio</a>'
+            });
+            event.preventDefault()
+            event.stopPropagation()
+
+        }
+
+
+        else {
             //here i can send the values to the backend
             //need a transaction object
             let nombre = document.getElementById("firstName").value;
@@ -111,6 +131,7 @@
                             title: "Compra hecha con exito",
                             footer: '<a href="/">Inicio</a>'
 });
+            contador += 1;
         }
     }
 
