@@ -184,6 +184,37 @@ def checkout():
     return render_template("pago.html")
 
 
+@app.route("/procesar_orden", methods=["POST"])
+@login_required
+def procesar_orden():
+    try:
+        data = request.get_json()
+        transaccion = data["transaccion"]
+        productos = data["products_list"]
+
+        numero = db.execute("INSERT INTO TRANSACCIONES (cliente, correo, direccion, forma_pago, entrega, delivery, fecha)"
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)",transaccion["cliente"], transaccion["correo"], transaccion["direccion"], transaccion["forma_pago"], transaccion["entrega"], transaccion["delivery"], datetime.now() )
+
+        for producto in productos:
+            p_id = db.execute("SELECT producto_id FROM PRODUCTOS WHERE nombre = ?", producto["nombre"])[0]["producto_id"]
+            db.execute("INSERT INTO productos_transaccion"
+                       "(pt_transaccion_id, pt_producto_id, cantidad, total)"
+                       "VALUES(?,?,?,?)",numero, p_id,producto["cantidad"], producto["total"])
+
+            #restar del inventario
+            cantidad_inventario = db.execute("SELECT cantidad FROM productos WHERE producto_id = ?", p_id)[0]["cantidad"]
+            db.execute("UPDATE productos set cantidad = ? WHERE producto_id = ?", (cantidad_inventario - producto["cantidad"]), p_id)
+            print(producto["cantidad"], "se compraron")
+
+            #enviar el correo
+
+
+
+        return jsonify({"message": "datos correctos"}) #Respuesta para la peticion fetch#############
+    except Exception as e:
+        print("Error en la ruta /procesar_orden:", str(e))
+        return redirect("/")
+
 @app.route("/logout")
 def logout():
     session.clear()
