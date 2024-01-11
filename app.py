@@ -1,13 +1,15 @@
 import datetime
 from datetime import datetime
-
 from flask import Flask, render_template, request, jsonify, session
+from flask_cors import CORS
 from flask_paginate import Pagination, get_page_parameter, get_page_args
 from flask_session import Session
 from cs50 import SQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from helpers import *
 from tempfile import mkdtemp
+
+TASA_CAMBIO = 37.00
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -18,6 +20,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 db = SQL("sqlite:///inventario.db")
 
 Session(app)
+CORS(app)
 
 
 # users = list(range(100))
@@ -192,13 +195,13 @@ def procesar_orden():
         transaccion = data["transaccion"]
         productos = data["products_list"]
 
-        numero = db.execute("INSERT INTO TRANSACCIONES (cliente, correo, direccion, forma_pago, entrega, delivery, fecha)"
+        numero = db.execute("INSERT INTO TRANSACCIONES (cliente, correo, direccion, forma_pago, entrega, mdelivery, fecha)"
                             "VALUES (?, ?, ?, ?, ?, ?, ?)",transaccion["cliente"], transaccion["correo"], transaccion["direccion"], transaccion["forma_pago"], transaccion["entrega"], transaccion["delivery"], datetime.now() )
 
         for producto in productos:
             p_id = db.execute("SELECT producto_id FROM PRODUCTOS WHERE nombre = ?", producto["nombre"])[0]["producto_id"]
             db.execute("INSERT INTO productos_transaccion"
-                       "(pt_transaccion_id, pt_producto_id, cantidad, total)"
+                       "(pt_transaccion_id, pt_producto_id, pt_cantidad, pt_precio_unitario)" #pt_precio_unitario antes se llamaba total
                        "VALUES(?,?,?,?)",numero, p_id,producto["cantidad"], producto["total"])
 
             #restar del inventario
@@ -214,6 +217,159 @@ def procesar_orden():
     except Exception as e:
         print("Error en la ruta /procesar_orden:", str(e))
         return redirect("/")
+
+@app.route("/reporte-ventas", methods=["GET", "POST"])
+@login_required
+def show_reports():
+    hoy = datetime.now()
+    fecha_formateada = hoy.strftime("%Y-%m-%d")
+    print(fecha_formateada)
+    return render_template("reportes.html", fecha_formateada=fecha_formateada)
+
+
+
+@app.route("/generar_reportes", methods=["POST"])
+@login_required
+def generar_reportes():
+
+    #Funcion que recibe y manda datos a la respuesta del fetch
+    data = request.get_json()
+    print(data)
+
+
+    query = (f"SELECT * FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id inner join main.productos p on p.producto_id = pt.pt_producto_id where fecha BETWEEN '{data["f1"]} 00:00:00' AND '{data["f2"]} 23:59:59' ORDER BY fecha DESC;")
+    consulta = db.execute(query)
+    query_vendidos =f'''SELECT sum(pt.pt_cantidad) as vendidos FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+                        inner join main.productos p on p.producto_id = pt.pt_producto_id where fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+    vendidos = db.execute(query_vendidos)[0]
+
+    query_ventas = f' SELECT count(*) as ventas FROM transacciones WHERE fecha between "{data["f1"]} 00:00:00" AND "{data["f2"]} 23:59:59" '
+    ventas = db.execute(query_ventas)[0]
+
+    query_facturado = f'''SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as facturado FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+                            inner join main.productos p on p.producto_id = pt.pt_producto_id where fecha
+                            BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    facturado = float(db.execute(query_facturado)[0]["facturado"])
+    query_entregas_local = f''' 
+    SELECT count(entrega) FROM transacciones WHERE entrega = "local" AND fecha
+    BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";
+    '''
+    query_entregas_delivery = f''' 
+        SELECT count(entrega) FROM transacciones WHERE entrega = "delivery" AND fecha
+        BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";
+        '''
+
+    query_total_efectivo = f''' SELECT count(forma_pago) as fp FROM transacciones WHERE forma_pago = "efectivo" AND fecha 
+                                BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    query_total_transferencia = f''' SELECT count(forma_pago) as fp FROM transacciones WHERE forma_pago = "transferencia" AND fecha 
+                                BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    query_total_tarjeta = f''' SELECT count(forma_pago) as fp FROM transacciones WHERE forma_pago = "tarjeta" AND fecha 
+                                BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    query_monto_efectivo = f''' 
+    SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+inner join main.productos p on p.producto_id = pt.pt_producto_id
+where forma_pago = "efectivo" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    query_monto_transferencia = f''' 
+    SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+inner join main.productos p on p.producto_id = pt.pt_producto_id
+where forma_pago = "transferencia" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    query_monto_tarjeta = f''' 
+    SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+inner join main.productos p on p.producto_id = pt.pt_producto_id
+where forma_pago = "tarjeta" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    query_recaudado_delivery = f''' SELECT  ifnull(sum(mdelivery), 0) as rdelivery FROM transacciones where fecha  BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
+
+    recaudado_delivery = db.execute(query_recaudado_delivery)[0]["rdelivery"]
+
+    round(recaudado_delivery, 2)
+    recaudado_delivery_dolares = round(recaudado_delivery / 37, 2)
+
+    query_rdelivery_efectivo = f''' 
+    SELECT ifnull(SUM(mdelivery), 0) as mdelivery FROM transacciones
+    where forma_pago = "efectivo" AND entrega = "delivery" AND fecha
+    BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59"     
+    '''
+    query_rdelivery_transferencia = f''' 
+    SELECT ifnull(SUM(mdelivery), 0) as mdelivery FROM transacciones
+    where forma_pago = "transferencia" AND entrega = "delivery" AND fecha
+    BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59"     
+    '''
+    query_rdelivery_tarjeta = f''' 
+    SELECT ifnull(SUM(mdelivery), 0) as mdelivery FROM transacciones
+    where forma_pago = "tarjeta" AND entrega = "delivery" AND fecha
+    BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59"     
+    '''
+
+    rdelivery_efectivo = float(db.execute(query_rdelivery_efectivo)[0]["mdelivery"])
+    rdelivery_transferencia = float(db.execute(query_rdelivery_transferencia)[0]["mdelivery"])
+    rdelivery_tarjeta = float(db.execute(query_rdelivery_tarjeta)[0]["mdelivery"])
+
+
+    print(f"recaudado de delivery: {recaudado_delivery} en dolares: {recaudado_delivery_dolares}")
+    print("@@@@@@@@@@",facturado)
+    print("@@@@@@@@@@",recaudado_delivery_dolares)
+
+
+
+
+
+    monto_efectivo = float(db.execute(query_monto_efectivo)[0]["monto"])
+    monto_transferencia = db.execute(query_monto_transferencia)[0]["monto"]
+    monto_tarjeta = db.execute(query_monto_tarjeta)[0]["monto"]
+
+    compras_efectivo = db.execute(query_total_efectivo)[0]["fp"]
+    compras_transferencia = db.execute(query_total_transferencia)[0]["fp"]
+    compras_tarjeta = db.execute(query_total_tarjeta)[0]["fp"]
+
+    entregas_local = db.execute(query_entregas_local)[0]["count(entrega)"]
+    entregas_delivery = db.execute(query_entregas_delivery)[0]["count(entrega)"]
+    print(entregas_local, "entregas local")
+    print(entregas_delivery, "entregas delivery")
+
+    print(vendidos["vendidos"])
+    monto_ventas = monto_efectivo + monto_transferencia + monto_tarjeta
+
+    print(f"monto efectivo: {monto_efectivo} monto d: {rdelivery_efectivo}")
+    print(f"monto transferencia: {monto_transferencia} monto d: {rdelivery_transferencia}")
+    print(f"monto tarjeta: {monto_tarjeta} monto d: {rdelivery_tarjeta}")
+    #for columna in consulta:
+    #    print(columna)
+    send = {"query_productos": consulta,
+            "vendidos": vendidos,
+            "recaudado_delivery": recaudado_delivery,
+            "ventas": ventas,
+            "facturado": facturado + recaudado_delivery_dolares,
+            "entregas_local": entregas_local,
+            "entregas_delivery": entregas_delivery,
+            "compras_efectivo": compras_efectivo,
+            "compras_transferencia": compras_transferencia,
+            "compras_tarjeta": compras_tarjeta,
+            "monto_efectivo": round(monto_efectivo + (rdelivery_efectivo / TASA_CAMBIO), 2),
+            "monto_transferencia": round(monto_transferencia + (rdelivery_transferencia / TASA_CAMBIO), 2),
+            "monto_tarjeta": round(monto_tarjeta + (rdelivery_tarjeta / TASA_CAMBIO), 2),
+            "recaudado_delivery_cordobas": recaudado_delivery,
+            "monto_ventas": monto_ventas
+
+
+
+            }
+
+    print(consulta)
+
+    #("{consulta: [{}, {}, {}],"
+    # "ventas: a",
+    # "p_vendidos}")
+
+    return jsonify(send)
+
+
 
 @app.route("/logout")
 def logout():
