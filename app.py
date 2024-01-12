@@ -201,7 +201,7 @@ def procesar_orden():
         for producto in productos:
             p_id = db.execute("SELECT producto_id FROM PRODUCTOS WHERE nombre = ?", producto["nombre"])[0]["producto_id"]
             db.execute("INSERT INTO productos_transaccion"
-                       "(pt_transaccion_id, pt_producto_id, pt_cantidad, pt_precio_unitario)" #pt_precio_unitario antes se llamaba total
+                       "(pt_transaccion_id, pt_producto_id, pt_cantidad, pt_monto_producto)" #pt_monto_producto antes se llamaba total
                        "VALUES(?,?,?,?)",numero, p_id,producto["cantidad"], producto["total"])
 
             #restar del inventario
@@ -246,7 +246,7 @@ def generar_reportes():
     query_ventas = f' SELECT count(*) as ventas FROM transacciones WHERE fecha between "{data["f1"]} 00:00:00" AND "{data["f2"]} 23:59:59" '
     ventas = db.execute(query_ventas)[0]
 
-    query_facturado = f'''SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as facturado FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+    query_facturado = f'''SELECT ifnull(sum(pt_monto_producto), 0) as facturado FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
                             inner join main.productos p on p.producto_id = pt.pt_producto_id where fecha
                             BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
 
@@ -270,17 +270,17 @@ def generar_reportes():
                                 BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
 
     query_monto_efectivo = f''' 
-    SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+    SELECT ifnull(sum(pt_monto_producto), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
 inner join main.productos p on p.producto_id = pt.pt_producto_id
 where forma_pago = "efectivo" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
 
     query_monto_transferencia = f''' 
-    SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+    SELECT ifnull(sum(pt_monto_producto), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
 inner join main.productos p on p.producto_id = pt.pt_producto_id
 where forma_pago = "transferencia" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
 
     query_monto_tarjeta = f''' 
-    SELECT ifnull(sum(pt_cantidad * pt_precio_unitario), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
+    SELECT ifnull(sum(pt_monto_producto), 0) as monto FROM transacciones INNER JOIN productos_transaccion pt on transacciones.transaccion_id = pt.pt_transaccion_id
 inner join main.productos p on p.producto_id = pt.pt_producto_id
 where forma_pago = "tarjeta" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{data["f2"]} 23:59:59";'''
 
