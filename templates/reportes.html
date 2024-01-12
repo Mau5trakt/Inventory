@@ -6,7 +6,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
-    <title>BBB Checkout</title>
+      <link rel="icon"  type="image/x-icon" href="../static/icon.ico">
+    <title>Reportes</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/checkout/">
 
@@ -19,7 +20,7 @@
 
     <link rel="stylesheet" href="../static/estilopago.css">
       <script src="https://kit.fontawesome.com/95dc01c56b.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../static/carrito.css">
+
 
 
     <!-- Custom styles for this template -->
@@ -39,24 +40,7 @@
                     <a class="nav-link active" aria-current="page" href="/"> Inicio </a>
                 </li>
       </ul>
-        <div class="d-flex p-3" id="carritoContainer">
 
-            <div id="carritoDiv" class="contenedor"> Carrito Actual <button type="button" class="btn btn-danger" onclick="eliminarCarrito()">Borrar Carrito</button>
-                <table class="table table-hover" id="carritoTable">
-                    <tr>
-                        <th> # </th>
-                        <th> Elemento </th>
-                        <th> Cantidad </th>
-                    </tr>
-                    <tbody>
-
-                    </tbody>
-                </table>
-
-
-            </div>
-
-        </div>
 
         <div class="d-flex">
             <a href="/logout" class="nav-link"> Cerrar Sesion</a>
@@ -81,7 +65,7 @@
     <div class="col-6">
       <label for="fecha_inicio" class="col-form-label">Fecha Inicio</label>
       <div class="input-group date" id="datepicker1">
-        <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio">
+        <input type="date" class="form-control" value="{{ fecha_formateada }}" max="{{ fecha_formateada }}" name="fecha_inicio" id="fecha_inicio">
         <span class="input-group-append"></span>
       </div>
     </div>
@@ -89,7 +73,7 @@
     <div class="col-6">
       <label for="fecha_fin" class="col-form-label">Fecha Fin</label>
       <div class="input-group date" id="datepicker2">
-        <input type="date" class="form-control" name="fecha_fin" id="fecha_fin">
+        <input type="date" class="form-control" value="{{ fecha_formateada }}" name="fecha_fin" id="fecha_fin">
         <span class="input-group-append"></span>
       </div>
     </div>
@@ -117,17 +101,17 @@
 
           <li class="list-group-item d-flex justify-content-between lh-sm" id="pvendidos-container">
               <h6 class="my-0">Productos Vendidos</h6>
-            <span class="text-body-secondary" id="productos_vendidos">8</span>
+            <span class="text-body-secondary" id="productos_vendidos"></span>
           </li>
 
             <li class="list-group-item d-flex justify-content-between lh-sm" id="tventas-container">
                 <h6 class="my-0">Ventas Totales</h6>
-                <span class="text-body-secondary" id="total_ventas">3</span>
+                <span class="text-body-secondary" id="total_ventas"></span>
           </li>
 
             <li class="list-group-item d-flex justify-content-between lh-sm" id="tfacturado-container">
                 <strong class="my-0">  Total Facturado</strong>
-                <span class="text-body-secondary" id="total_facturado"><strong>  $700</strong> </span>
+                <strong id="total_facturado"> </strong>
             </li>
             <hr class="my-4">
 
@@ -137,22 +121,22 @@
 
             <li class="list-group-item d-flex justify-content-between lh-sm" id="cventas_efectivo_container">
                 <h6 class="my-0">Ventas Efectivo</h6>
-                <span class="text-body-secondary" id="cantidad_ventas_efectivo">2</span>
+                <span class="text-body-secondary" id="cantidad_ventas_efectivo"></span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-sm" id="cventas_transferencia_container">
                 <h6 class="my-0">Ventas Transferencia</h6>
-                <span class="text-body-secondary" id="cantidad_ventas_transferencia">1</span>
+                <span class="text-body-secondary" id="cantidad_ventas_transferencia"></span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-sm" id="cventas_trajeta_container">
                 <h6 class="my-0">Ventas Tarjeta</h6>
-                <span class="text-body-secondary" id="cantidad_ventas_tarjeta">0</span>
+                <span class="text-body-secondary" id="cantidad_ventas_tarjeta"></span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-sm" id="tventas-container">
                 <strong  class="my-0">Total ventas</strong>
-                <strong class="text-body-secondary" id="total_ventas">3</strong>
+                <strong class="text-body-secondary" id="total_ventas"></strong>
             </li>
             <hr class="my-4">
 
@@ -162,18 +146,18 @@
 
           <li class="list-group-item d-flex justify-content-between lh-sm" id="tventas-container">
                 <h6 class="my-0">Local</h6>
-                <span class="text-body-secondary" id="entregas_local">2</span>
+                <span class="text-body-secondary" id="entregas_local">0</span>
           </li>
 
           <li class="list-group-item d-flex justify-content-between lh-sm" id="tventas-container">
                 <h6 class="my-0">Delivery</h6>
-                <span class="text-body-secondary" id="entregas_delivery">1</span>
+                <span class="text-body-secondary" id="entregas_delivery">0</span>
           </li>
 
 
           <li class="list-group-item d-flex justify-content-between">
             <strong>Total Entregas</strong>
-            <strong id="total_ventas">3</strong>
+            <strong id="total_ventas"></strong>
           </li>
             <hr class="my-4">
 
@@ -183,17 +167,45 @@
 
             <li class="list-group-item d-flex justify-content-between">
             <h6>Efectivo</h6>
-            <span id="monto_efectivo">$0</span>
+            <span id="monto_efectivo"></span>
           </li>
           <li class="list-group-item d-flex justify-content-between">
             <h6>Transferencia</h6>
-            <span id="monto_transferencia">$0</span>
+            <span id="monto_transferencia"></span>
           </li>
             <li class="list-group-item d-flex justify-content-between">
             <h6>Tarjeta</h6>
-            <span id="monto_tarjeta">$0</span>
+            <span id="monto_tarjeta"></span>
           </li>
+            <li class="list-group-item d-flex justify-content-between lh-sm" id="tfacturado-container">
+                <strong class="my-0">  Total Facturado</strong>
+                <strong id="total_facturado"></strong>
+            </li>
             <hr class="my-4">
+
+
+            <li class="list-group-item d-flex justify-content-center lh-sm">
+                <h5 class="my-0">Recaudacion</h5>
+          </li>
+
+            <li class="list-group-item d-flex justify-content-between">
+            <h6>Productos</h6>
+            <span id="monto_ventas"></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <h6>Delivery (Cordobas)</h6>
+            <span id="monto_delivery"></span>
+          </li>
+            <li class="list-group-item d-flex justify-content-between">
+            <strong>Total Cordobas</strong>
+            <span id="monto_cordobas"> </span>
+
+          </li>
+            <li class="list-group-item d-flex justify-content-between">
+            <strong> Total Dolares</strong>
+            <strong class="my-0" id="total_facturado"></strong>
+
+          </li>
 
 
 
@@ -205,31 +217,27 @@
       </div>
 
       <div class="col-md-7 col-lg-8" id="datos">
-        <h4 class="mb-3">Aqui la tabla</h4>
-
           <div class="container">
   <div class="table-responsive">
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>Encabezado 1</th>
-          <th>Encabezado 2</th>
-          <th>Encabezado 3</th>
-          <th>Encabezado 4</th>
-          <th>Encabezado 5</th>
-          <th>Encabezado 6</th>
-          <th>Encabezado 6</th>
-          <th>Encabezado 6</th>
-          <th>Encabezado 6</th>
-          <th>Encabezado 6</th>
-          <th>Encabezado 6</th>
+            <th>Transacción</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Total</th>
+            <th>Forma de pago</th>
+            <th>Entrega</th>
+            <th>Categoria</th>
 
         </tr>
       </thead>
       <tbody id="tabla_body">
         <tr>
-          <td>Dato 1</td>
-          <td>Dato 2</td>
+
 
         </tr>
       </tbody>
@@ -249,8 +257,6 @@
 
 
     <script src="../static/checkout.css"></script>
-    <script src="../static/carrito.js"></script>
-  <script src="../static/checkout.js"></script>
   <script src="../static/reportes.js" defer></script>
 
   </body>
