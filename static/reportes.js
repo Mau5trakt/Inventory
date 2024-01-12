@@ -58,9 +58,9 @@ function get_report(fechaIn, fechaFi)
                 celdaEntrega.textContent = row.entrega
                 celdaProducto.textContent = row.nombre
                 celdaCantidad.textContent = row.pt_cantidad
-                celdaPrecioU.textContent = row.pt_precio_unitario
+                celdaPrecioU.textContent = row.pt_monto_producto / row.pt_cantidad
 
-                let total = (row.pt_cantidad *  row.pt_precio_unitario).toFixed(2)
+                let total = (row.pt_monto_producto).toFixed(2)
                 celdaTotal.textContent = total
 
                 celdaCategoria.textContent = row.categoria

@@ -88,7 +88,7 @@
                 let nombre = producto.querySelector("h6").textContent
                 let qty = producto.querySelector("input").value
                 let price = producto.querySelector("#priceItem").textContent
-
+                //below this insert the discount ammount
                 let producto_insert = {nombre: nombre, cantidad: Number(qty), total: Number(price.replace("$", "")).toFixed(2)}
                 products_list.push(producto_insert)
             });
