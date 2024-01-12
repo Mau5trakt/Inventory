@@ -58,7 +58,7 @@ function get_report(fechaIn, fechaFi)
                 celdaEntrega.textContent = row.entrega
                 celdaProducto.textContent = row.nombre
                 celdaCantidad.textContent = row.pt_cantidad
-                celdaPrecioU.textContent = row.pt_monto_producto / row.pt_cantidad
+                celdaPrecioU.textContent = (row.pt_monto_producto / row.pt_cantidad).toLocaleString()
 
                 let total = (row.pt_monto_producto).toFixed(2)
                 celdaTotal.textContent = total
