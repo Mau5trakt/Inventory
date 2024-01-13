@@ -1,12 +1,13 @@
 import datetime
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 from flask_cors import CORS
 from flask_paginate import Pagination, get_page_parameter, get_page_args
 from flask_session import Session
 from cs50 import SQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from helpers import *
+from pyexcel_xlsx import save_data
 from tempfile import mkdtemp
 
 TASA_CAMBIO = 37.00
@@ -369,6 +370,21 @@ where forma_pago = "tarjeta" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{d
 
     return jsonify(send)
 
+
+@app.route("/descargar_productos", methods=["GET"])
+@login_required
+def descargar_productos():
+    productos = db.execute(
+        "SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia  FROM PRODUCTOS")
+
+    array = [["Productos en existencia", datetime.now()], [""], ["ID Producto", "Cantidad", "Nombre", "Precio de Venta", "Costo", "Categoria", "Ganancia Neta", "Ganancia Potencial", "Porcentaje de Ganancia"]]
+    for producto in productos:
+        array.append([producto["producto_id"], producto["cantidad"], producto["nombre"], producto["precio_venta"], producto["costo"], producto["categoria"], producto["ganancia_neta"], producto["ganancia_potencial"], producto["porcentaje_ganancia"]])
+
+    excel_file_path = "productos.xlsx"
+    save_data(excel_file_path, {"Hoja 1": array})
+
+    return send_file(excel_file_path, as_attachment=True, download_name=f'productos - {datetime.now()} .xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 @app.route("/logout")
