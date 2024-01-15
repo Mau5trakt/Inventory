@@ -1,4 +1,5 @@
 import datetime
+import os.path
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session, send_file
 from flask_cors import CORS
@@ -7,16 +8,20 @@ from flask_session import Session
 from cs50 import SQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from helpers import *
-from pyexcel_xlsx import save_data
+from pyexcel_xlsx import save_data, get_data
+import json
 from tempfile import mkdtemp
 
 TASA_CAMBIO = 37.00
+
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+
+app.config["INSERCIONES_FOLDER"] = "inserciones/"
 
 db = SQL("sqlite:///inventario.db")
 
@@ -25,6 +30,9 @@ CORS(app)
 
 
 # users = list(range(100))
+def allowed_insertion(filename):
+    ALLOWED_EXTENSION = {'xlsx'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSION
 
 
 @app.after_request
@@ -385,6 +393,65 @@ def descargar_productos():
     save_data(excel_file_path, {"Hoja 1": array})
 
     return send_file(excel_file_path, as_attachment=True, download_name=f'productos - {datetime.now()} .xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+@app.route("/insertar_productos", methods=["GET", "POST"])
+@login_required
+def insertar():
+    nav_links = [{"nombre": "Insertar Productos", "ruta": "/insertar_productos"},
+                 {"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+                 {"nombre": "Inventario", "ruta": "/"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+
+    if request.method == "POST":
+        #print(request.files)
+        if 'file' not in request.files:
+            return apology("No se proporcionó ningún archivo")
+
+        file = request.files["file"]
+
+        if file.filename == '':
+            return apology("Nombre de archivo no valido")
+
+        if file and allowed_insertion(file.filename):
+            array = [["producto", "cantidad"]]
+            print("Valid")
+            data = json.loads(json.dumps(get_data(file)))
+            productos = data["Hoja1"][1:]
+            cabeceras = data["Hoja1"][0]
+
+            cabeceras_minusculas = [cabecera.lower() for cabecera in cabeceras]
+            if len(cabeceras) != 2 or cabeceras_minusculas[0] != "producto" or cabeceras_minusculas[1] != "cantidad":
+                return apology("Contenido del archivo invalido")
+            #print(cabeceras)
+            #print(cabeceras_minusculas)
+            try:
+                for producto in productos:
+                    producto_info = db.execute("SELECT producto_id, cantidad, nombre FROM productos WHERE nombre = ?", producto[0])
+                    producto_id = producto_info[0]["producto_id"]
+                    cantidad = producto_info[0]["cantidad"]
+                    nombre = producto_info[0]["nombre"]
+                    if int(producto[1]) < 0:
+                        pass
+                    else:
+                            #Introducir lo que mandó el usuario
+                        array.append([nombre, producto[1]])
+                        ncantidad = int(cantidad) + int(producto[1])
+                        db.execute("UPDATE productos SET cantidad = ? WHERE producto_id = ?", ncantidad, producto_id)
+                        print(producto_id, cantidad)
+            except:
+                pass
+
+            os.makedirs(app.config["INSERCIONES_FOLDER"], exist_ok=True)
+            excel_file_path = f"./inserciones/Insercion Multiple - {datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
+            save_data(excel_file_path, {"Hoja 1": array})
+
+
+            return redirect("/")
+
+    #return apology("Extension de arhivo no permitida")
+    return render_template("insertar.html", nav_links=nav_links)
+
+
 
 
 @app.route("/logout")
