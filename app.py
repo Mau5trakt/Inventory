@@ -422,9 +422,18 @@ def insertar():
             productos = data["Hoja1"][1:]
             cabeceras = data["Hoja1"][0]
 
-            cabeceras_minusculas = [cabecera.lower() for cabecera in cabeceras]
-            if len(cabeceras) != 2 or cabeceras_minusculas[0] != "producto" or cabeceras_minusculas[1] != "cantidad":
+            try:
+                cabeceras_minusculas = [cabecera.lower() for cabecera in cabeceras]
+                if len(cabeceras_minusculas) != 2:
+                    return apology("Contenido del archivo invalido")
+            except:
                 return apology("Contenido del archivo invalido")
+
+
+            if cabeceras_minusculas[0] != "producto" or cabeceras_minusculas[1] != "cantidad" or len(cabeceras) != 2:
+                return apology("Contenido del archivo invalido")
+
+
             #print(cabeceras)
             #print(cabeceras_minusculas)
             try:
