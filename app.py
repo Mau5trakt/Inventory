@@ -460,6 +460,36 @@ def insertar():
     #return apology("Extension de arhivo no permitida")
     return render_template("insertar.html", nav_links=nav_links)
 
+@app.route("/editar-inventario/<int:id>", methods=["GET", "POST"])
+@login_required
+def editar_inventario(id):
+    producto = db.execute(
+        "SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE producto_id = ?",
+        id)[0]
+
+    nav_links = [{"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
+                 {"nombre": "Inventario", "ruta": "/"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
+
+    if request.method == "POST":
+        cantidad = request.form.get("cantidad")
+
+        try:
+            cantidad = int(cantidad)
+        except:
+            return apology("Introduzca una cantidad valida")
+
+        if cantidad < 0:
+            return apology("Introduzca cantidades positivas")
+
+        db.execute("UPDATE productos SET cantidad = ? WHERE producto_id = ?", cantidad, id)
+
+        return redirect(f"/editar-producto/{producto['producto_id']}")
+
+
+
+    return render_template("editar-inventario.html", producto=producto, nav_links=nav_links)
 
 
 
