@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+
+{% block content %}
+
+    <div class="container pt-3">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">Editar Inventario</div>
+          <div class="card-body">
+            <form method="POST" action="/editar-inventario/{{ producto['producto_id'] }}">
+
+              <div class="mb-3 row">
+                <label for="nombre" class="col-md-4 col-form-label text-md-end">Nombre</label>
+
+                <div class="col-md-6">
+                  <input id="nombre" type="nombre" class="form-control" name="nombre" autocomplete="nombre" value="{{producto['nombre']}}" autofocus disabled>
+                </div>
+              </div>
+
+              <div class="mb-3 row">
+                <label for="cantidad" class="col-md-4 col-form-label text-md-end">Cantidad</label>
+
+                <div class="col-md-6">
+                  <input id="cantidad" type="number" class="form-control" name="cantidad" autocomplete="cantidad" value="{{producto['cantidad']}}" autofocus>
+                </div>
+              </div>
+
+
+              <div class="mb-3 row">
+                <div class="col-md-6 offset-md-4">
+                  <button type="submit" class="btn btn-primary">Modificar Cantidad</button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+<script src="../static/agregar.js"> </script>
+<script src="../static/carrito.js"> </script>
+
+{% endblock %}
