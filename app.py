@@ -123,15 +123,11 @@ def agregar_producto():
     if request.method == "POST":
 
         nombre = request.form.get("nombre")
-        cantidad = request.form.get("cantidad")
         costo = request.form.get("costo")
         precio_venta = request.form.get("precio-venta")
         categoria = request.form.get("categoria")
 
-        try:
-            cantidad = int(cantidad)
-        except:
-            return apology("Numeros decimales no permitidos")
+
 
         try:
             precio_venta = float(precio_venta)
@@ -147,9 +143,9 @@ def agregar_producto():
             return apology("Introduzca nombre del producto")
 
         db.execute("INSERT INTO productos(nombre, cantidad, precio_venta, costo, categoria) VALUES (?, ?, ?, ?, ?)",
-                   nombre, cantidad, precio_venta, costo, categoria)
+                   nombre, 0, precio_venta, costo, categoria)
 
-    return render_template("agregar-producto.html", nav_links=nav_links)
+    return render_template("registrar-producto.html", nav_links=nav_links)
 
 
 @app.route("/editar-producto/<int:id>", methods=["GET", "POST"])
