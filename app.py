@@ -436,8 +436,8 @@ def insertar():
 
             #print(cabeceras)
             #print(cabeceras_minusculas)
-            try:
-                for producto in productos:
+            for producto in productos:
+                try:
                     producto_info = db.execute("SELECT producto_id, cantidad, nombre FROM productos WHERE nombre = ?", producto[0])
                     producto_id = producto_info[0]["producto_id"]
                     cantidad = producto_info[0]["cantidad"]
@@ -450,8 +450,9 @@ def insertar():
                         ncantidad = int(cantidad) + int(producto[1])
                         db.execute("UPDATE productos SET cantidad = ? WHERE producto_id = ?", ncantidad, producto_id)
                         print(producto_id, cantidad)
-            except:
-                pass
+                except:
+                    pass
+
 
             os.makedirs(app.config["INSERCIONES_FOLDER"], exist_ok=True)
             excel_file_path = f"./inserciones/Insercion Multiple - {datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
