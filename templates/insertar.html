@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="container pt-3">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">Insertar multiples productos</div>
+          <div class="card-body">
+            <form method="POST" action="/insertar_productos" enctype="multipart/form-data">
+
+
+                <div class="mb-3 row">
+                <h2>Instrucciones</h2>
+
+
+                    <p> Haga click en Examinar y seleccione un archivo de excel, el cual debe contener dos columnas <strong> producto  </strong> y <strong> cantidad.</strong>  Se debe verificar de que cada fila contenga ambos elementos. </p>
+                    <p> El nombre del producto debe ser identico al que aparece en el archivo de productos disponible para descargar en la pagina de busqueda de productos</p>
+
+                </div>
+                <figure>
+                    <figcaption> Ejemplo de archivo válido</figcaption>
+                    <img src="/static/correcto.png" alt="">
+                </figure>
+
+                <figure>
+                    <figcaption> Ejemplo de archivo inválido</figcaption>
+                    <img src="/static/incorrecto.png" alt="">
+                </figure>
+
+                <div class="mb-3 row">
+                <label for="imagen" class="col-md-4 col-form-label text-md-end">Archivo Excel</label>
+
+                <div class="col-md-6">
+                  <input id="imagen" type="file" class="form-control" name="file" autocomplete="file" autofocus>
+                </div>
+              </div>
+
+
+              <div class="mb-3 row">
+                <div class="col-md-6 offset-md-4">
+                  <button type="submit" class="btn btn-primary">Agregar Productos</button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+<script src="../static/agregar.js"> </script>
+<script src="../static/carrito.js"> </script>
+
+{% endblock %}

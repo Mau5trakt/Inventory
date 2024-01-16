@@ -1,21 +1,27 @@
 import datetime
+import os.path
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 from flask_cors import CORS
 from flask_paginate import Pagination, get_page_parameter, get_page_args
 from flask_session import Session
 from cs50 import SQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from helpers import *
+from pyexcel_xlsx import save_data, get_data
+import json
 from tempfile import mkdtemp
 
 TASA_CAMBIO = 37.00
+
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+
+app.config["INSERCIONES_FOLDER"] = "inserciones/"
 
 db = SQL("sqlite:///inventario.db")
 
@@ -24,6 +30,9 @@ CORS(app)
 
 
 # users = list(range(100))
+def allowed_insertion(filename):
+    ALLOWED_EXTENSION = {'xlsx'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSION
 
 
 @app.after_request
@@ -47,8 +56,8 @@ def index():
     def filter_products(search_term):
         return [p for p in productos if search_term.lower() in p["nombre"].lower()]
 
-    nav_links = [{"nombre": "Inventario", "ruta": "/"}, {"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+    nav_links = [{"nombre": "Inventario", "ruta": "/"}, {"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}, {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
     page, per_page, offset = get_page_args(page_parameter='page',
                                            per_page_parameter='per_page')
     total = len(productos)  # len(users)
@@ -103,25 +112,22 @@ def login():
     return render_template("login.html", year=year, )
 
 
-@app.route("/agregar-productos", methods=["GET", "POST"])
+@app.route("/registrar-producto", methods=["GET", "POST"])
 @login_required
 def agregar_producto():
-    nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+    nav_links = [{"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
                  {"nombre": "Inventario", "ruta": "/"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
 
     if request.method == "POST":
 
         nombre = request.form.get("nombre")
-        cantidad = request.form.get("cantidad")
         costo = request.form.get("costo")
         precio_venta = request.form.get("precio-venta")
         categoria = request.form.get("categoria")
 
-        try:
-            cantidad = int(cantidad)
-        except:
-            return apology("Numeros decimales no permitidos")
+
 
         try:
             precio_venta = float(precio_venta)
@@ -137,17 +143,18 @@ def agregar_producto():
             return apology("Introduzca nombre del producto")
 
         db.execute("INSERT INTO productos(nombre, cantidad, precio_venta, costo, categoria) VALUES (?, ?, ?, ?, ?)",
-                   nombre, cantidad, precio_venta, costo, categoria)
+                   nombre, 0, precio_venta, costo, categoria)
 
-    return render_template("agregar-producto.html", nav_links=nav_links)
+    return render_template("registrar-producto.html", nav_links=nav_links)
 
 
 @app.route("/editar-producto/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_producto(id):
-    nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+    nav_links = [{"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
                  {"nombre": "Inventario", "ruta": "/"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
     producto = db.execute(
         "SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE producto_id = ?",
         id)[0]
@@ -368,6 +375,120 @@ where forma_pago = "tarjeta" AND fecha BETWEEN "{data["f1"]} 00:00:00" AND   "{d
     # "p_vendidos}")
 
     return jsonify(send)
+
+
+@app.route("/descargar_productos", methods=["GET"])
+@login_required
+def descargar_productos():
+    productos = db.execute(
+        "SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia  FROM PRODUCTOS")
+
+    array = [["Productos en existencia", datetime.now()], [""], ["ID Producto", "Cantidad", "Nombre", "Precio de Venta", "Costo", "Categoria", "Ganancia Neta", "Ganancia Potencial", "Porcentaje de Ganancia"]]
+    for producto in productos:
+        array.append([producto["producto_id"], producto["cantidad"], producto["nombre"], producto["precio_venta"], producto["costo"], producto["categoria"], producto["ganancia_neta"], producto["ganancia_potencial"], producto["porcentaje_ganancia"]])
+
+    excel_file_path = "productos.xlsx"
+    save_data(excel_file_path, {"Hoja 1": array})
+
+    return send_file(excel_file_path, as_attachment=True, download_name=f'productos - {datetime.now()} .xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+@app.route("/insertar_productos", methods=["GET", "POST"])
+@login_required
+def insertar():
+    nav_links = [{"nombre": "Insertar Productos", "ruta": "/insertar_productos"},
+                 {"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
+                 {"nombre": "Inventario", "ruta": "/"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},]
+
+    if request.method == "POST":
+        #print(request.files)
+        if 'file' not in request.files:
+            return apology("No se proporcionó ningún archivo")
+
+        file = request.files["file"]
+
+        if file.filename == '':
+            return apology("Nombre de archivo no valido")
+
+        if file and allowed_insertion(file.filename):
+            array = [["producto", "cantidad"]]
+            print("Valid")
+            data = json.loads(json.dumps(get_data(file)))
+            productos = data["Hoja1"][1:]
+            cabeceras = data["Hoja1"][0]
+
+            try:
+                cabeceras_minusculas = [cabecera.lower() for cabecera in cabeceras]
+                if len(cabeceras_minusculas) != 2:
+                    return apology("Contenido del archivo invalido")
+            except:
+                return apology("Contenido del archivo invalido")
+
+
+            if cabeceras_minusculas[0] != "producto" or cabeceras_minusculas[1] != "cantidad" or len(cabeceras) != 2:
+                return apology("Contenido del archivo invalido")
+
+
+            #print(cabeceras)
+            #print(cabeceras_minusculas)
+            for producto in productos:
+                try:
+                    producto_info = db.execute("SELECT producto_id, cantidad, nombre FROM productos WHERE nombre = ?", producto[0])
+                    producto_id = producto_info[0]["producto_id"]
+                    cantidad = producto_info[0]["cantidad"]
+                    nombre = producto_info[0]["nombre"]
+                    if int(producto[1]) < 0:
+                        pass
+                    else:
+                            #Introducir lo que mandó el usuario
+                        array.append([nombre, producto[1]])
+                        ncantidad = int(cantidad) + int(producto[1])
+                        db.execute("UPDATE productos SET cantidad = ? WHERE producto_id = ?", ncantidad, producto_id)
+                        print(producto_id, cantidad)
+                except:
+                    pass
+
+
+            os.makedirs(app.config["INSERCIONES_FOLDER"], exist_ok=True)
+            excel_file_path = f"./inserciones/Insercion Multiple - {datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
+            save_data(excel_file_path, {"Hoja 1": array})
+
+
+            return redirect("/")
+
+    #return apology("Extension de arhivo no permitida")
+    return render_template("insertar.html", nav_links=nav_links)
+
+@app.route("/editar-inventario/<int:id>", methods=["GET", "POST"])
+@login_required
+def editar_inventario(id):
+    producto = db.execute(
+        "SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE producto_id = ?",
+        id)[0]
+
+    nav_links = [{"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
+                 {"nombre": "Inventario", "ruta": "/"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
+
+    if request.method == "POST":
+        cantidad = request.form.get("cantidad")
+
+        try:
+            cantidad = int(cantidad)
+        except:
+            return apology("Introduzca una cantidad valida")
+
+        if cantidad < 0:
+            return apology("Introduzca cantidades positivas")
+
+        db.execute("UPDATE productos SET cantidad = ? WHERE producto_id = ?", cantidad, id)
+
+        return redirect(f"/editar-producto/{producto['producto_id']}")
+
+
+
+    return render_template("editar-inventario.html", producto=producto, nav_links=nav_links)
 
 
 
