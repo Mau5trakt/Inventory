@@ -56,8 +56,8 @@ def index():
     def filter_products(search_term):
         return [p for p in productos if search_term.lower() in p["nombre"].lower()]
 
-    nav_links = [{"nombre": "Inventario", "ruta": "/"}, {"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+    nav_links = [{"nombre": "Inventario", "ruta": "/"}, {"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}, {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
     page, per_page, offset = get_page_args(page_parameter='page',
                                            per_page_parameter='per_page')
     total = len(productos)  # len(users)
@@ -112,12 +112,13 @@ def login():
     return render_template("login.html", year=year, )
 
 
-@app.route("/agregar-productos", methods=["GET", "POST"])
+@app.route("/registrar-producto", methods=["GET", "POST"])
 @login_required
 def agregar_producto():
-    nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+    nav_links = [{"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
                  {"nombre": "Inventario", "ruta": "/"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
 
     if request.method == "POST":
 
@@ -154,9 +155,10 @@ def agregar_producto():
 @app.route("/editar-producto/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_producto(id):
-    nav_links = [{"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+    nav_links = [{"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
                  {"nombre": "Inventario", "ruta": "/"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
     producto = db.execute(
         "SELECT *, precio_venta - costo as ganancia_neta, (precio_venta - costo) * cantidad as ganancia_potencial, ((precio_venta - productos.costo) / productos.costo) * 100 as porcentaje_ganancia FROM productos WHERE producto_id = ?",
         id)[0]
@@ -398,9 +400,10 @@ def descargar_productos():
 @login_required
 def insertar():
     nav_links = [{"nombre": "Insertar Productos", "ruta": "/insertar_productos"},
-                 {"nombre": "Agregar Productos", "ruta": "/agregar-productos"},
+                 {"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
                  {"nombre": "Inventario", "ruta": "/"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"}]
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
+                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
 
     if request.method == "POST":
         #print(request.files)
