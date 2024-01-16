@@ -398,8 +398,7 @@ def insertar():
     nav_links = [{"nombre": "Insertar Productos", "ruta": "/insertar_productos"},
                  {"nombre": "Registrar Producto", "ruta": "/registrar-producto"},
                  {"nombre": "Inventario", "ruta": "/"},
-                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},
-                 {"nombre": "Insertar Productos", "ruta": "/insertar_productos"}]
+                 {"nombre": "Reporte de Ventas", "ruta": "reporte-ventas"},]
 
     if request.method == "POST":
         #print(request.files)
