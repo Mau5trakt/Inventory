@@ -460,7 +460,39 @@ function totalUpdate(){
 
     let totalValue = (subtotalConverted + deliveryConverted).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
     document.getElementById("total").textContent = `$${totalValue}`
+
 }
+
+document.getElementById("liTotal").addEventListener("mouseenter", function (){
+    setTimeout(function (){
+        let dolares = document.getElementById("total").textContent
+        let dolaresConverted = parseFloat(dolares.replace("$", ""))
+
+        let li = document.createElement("li")
+        let span = document.createElement("span")
+        let strong = document.createElement("strong")
+
+        li.classList.add("list-group-item", "d-flex", "justify-content-between")
+        li.id = "liCordobas"
+
+        span.textContent = "Total Cordobas"
+        strong.id= "tcordobas"
+        strong.textContent = `C$${(conversion * dolaresConverted).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+
+        let ul = document.getElementById("begin")
+        ul.appendChild(li)
+        li.appendChild(span)
+        li.appendChild(strong)
+    }, 1000)
+
+})
+document.getElementById("liTotal").addEventListener("mouseleave", function (){
+    setTimeout(function (){
+        let li = document.getElementById("liCordobas")
+        let ul = document.getElementById("begin")
+        ul.removeChild(li)
+    }, 500)
+})
 
 //Just call the function lmao
 cartRenderize()
