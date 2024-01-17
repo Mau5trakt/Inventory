@@ -152,18 +152,20 @@ function deliverySwitch(){
 
   radioLocal.addEventListener('change', function () {
     if (radioLocal.checked) {
-
+      document.getElementById("address").removeAttribute("required")
       inputDelivery.disabled = true;
       //Delete the delivery span also
       inputDelivery.value = 0;
 
       //Eliminate the delivery value and re-do the account
-        let lista = document.getElementById("begin")
-        let delivery = document.getElementById("deliveryPrice")
+        //More easy, just set the delivery price as 0
 
-        lista.removeChild(delivery)
+        document.getElementById("deliveryPrice").textContent = `$0.00`
+        let deliveryValue = 0
+        //document.getElementById("")
 
-        console.log(lista)
+        totalUpdate()
+
 
     }
   });
@@ -172,36 +174,17 @@ function deliverySwitch(){
     if (radioDelivery.checked){
 
       inputDelivery.disabled = false;
-
+      document.getElementById("address").setAttribute("required", "")
 
         //Set a default in the price to make more easy
+        //have to modify the value in the Delivery span
 
-        let li = document.createElement("li")
-        li.classList.add("list-group-item", "d-flex", "justify-content-between")
-        li.id = "deliveryPrice"
-
-        let spanName = document.createElement("span")
-        spanName.textContent = "Delivery"
-
-        let spanPrice = document.createElement("span")
-        spanPrice.id = "priceItem"
-        spanPrice.classList.add("text-body-secondary")
 
         let pconvertido = (inputDelivery.value / conversion).toFixed(2)
         console.log(pconvertido, "pconvertido")
-        spanPrice.textContent = pconvertido.toString()
 
-        //get the element with the total price
-        let liTotal = document.getElementById("liTotal")
-        // before Litotal i gotta insert the delivery price element
+        document.getElementById("deliveryPrice").textContent = `$${Number(pconvertido).toLocaleString()}`
 
-        li.insertAdjacentElement("afterbegin", spanName)
-        li.insertAdjacentElement("beforeend", spanPrice)
-        //
-        /*
-        * li -> span.Delivery, spanPrice
-        * */
-        liTotal.insertAdjacentElement("beforebegin", li)
 
         let products = document.querySelectorAll("#product")
         //Refactor this, eventually...
@@ -221,17 +204,6 @@ function deliverySwitch(){
         cuenta += parseFloat(pconvertido)
         document.querySelector("#total").textContent = cuenta.toFixed(2)
 
-
-
-
-
-
-
-        //^^ With this i have to add automatically the span for the delivery
-
-        //vv With that i have to actualize the value and the total in the checkout
-
-
       inputDelivery.addEventListener("input", () => {
 
            if (!/^\d+$/.test(inputDelivery.value))
@@ -244,38 +216,26 @@ function deliverySwitch(){
             });
         }
            else{
-               let liDeliver = document.getElementById("deliveryPrice")
-               let deliverPrice = liDeliver.querySelector("#priceItem")
-               console.log(deliverPrice, "333")
 
-               deliverPrice.textContent = ""
+               let valor = inputDelivery.value
+               let formatedValue = (valor/conversion).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
 
-               let p =  parseFloat(inputDelivery.value)
-               let priceFloat = (p / 37).toFixed(2) //Gotta improve this, i feel like yanderedev
+               document.getElementById("deliveryPrice").textContent = `$${formatedValue}`
 
-               deliverPrice.textContent = priceFloat.toString()
+               let subtotalElement = document.getElementById("subtotalPrice")
 
+               let subtotalPrice = parseFloat(subtotalElement.textContent.replace("$", ""))
 
-               // only actualize the values
+               let total = (valor / conversion) + subtotalPrice
 
+               let totalFormated = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
 
-               let products1 = document.querySelectorAll("#product")
-                //Refactor this, eventually...
-                let cuenta = 0;
-                for (let p of products1)
-                {
-                    let priceRow = p.querySelector("span")
-                    //cuenta += priceRow.textContent
-                    console.log(priceRow.textContent)
-                    let priceConverted = parseFloat(priceRow.textContent.replace("$", ""))
+               console.log(`total ${totalFormated}`)
 
-                    cuenta += priceConverted
+               //Modificar el total
+               document.getElementById("total").textContent = `$${Number(totalFormated)}`
 
 
-                }
-
-        cuenta +=  Number(priceFloat)
-        document.querySelector("#total").textContent = cuenta.toFixed(2)
            }
 
         console.log(inputDelivery.value)
@@ -295,7 +255,7 @@ function cartRenderize(){
   spanqty.textContent = carrito.length.toString()
 
   let cuenta = 0
-  let total = document.getElementById("total")
+  let subtotal = document.getElementById("subtotalPrice")
   let ul = document.getElementById("begin") // where the li gonna be inserte
 
   for (let articulo of carrito){
@@ -357,7 +317,8 @@ function cartRenderize(){
   }
 
 
-total.textContent = `$ ${cuenta.toFixed(2).toString()}`
+    subtotal.textContent = `$${cuenta.toFixed(2).toString()}`
+    totalUpdate()
 }
 
 function changeQty(element) {
@@ -445,7 +406,9 @@ function changeQty(element) {
 
                 }
                 console.log(cuenta)
-                document.querySelector("#total").textContent = cuenta.toFixed(2)
+                //document.querySelector("#total").textContent = cuenta.toFixed(2)
+                document.getElementById("subtotalPrice").textContent = `$${cuenta.toFixed(2)}`
+                totalUpdate()
 
 
             }
@@ -486,6 +449,17 @@ function deleteItem(element){
   }
 
 
+}
+
+function totalUpdate(){
+    let subtotalElement = document.getElementById("subtotalPrice").textContent
+    let subtotalConverted = parseFloat(subtotalElement.replace("$", ""))
+
+    let deliveryElement = document.getElementById("deliveryPrice").textContent
+    let deliveryConverted = parseFloat(deliveryElement.replace("$", ""))
+
+    let totalValue = (subtotalConverted + deliveryConverted).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
+    document.getElementById("total").textContent = `$${totalValue}`
 }
 
 //Just call the function lmao
