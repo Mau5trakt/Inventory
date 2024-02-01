@@ -491,6 +491,20 @@ def editar_inventario(id):
     return render_template("editar-inventario.html", producto=producto, nav_links=nav_links)
 
 
+@app.route("/transaccion/<int:id>")
+@login_required
+def show_transaction(id):
+    transaction = db.execute("SELECT * FROM transacciones WHERE transaccion_id = ?", id)[0]
+    productos = db.execute("SELECT * from productos_transaccion inner join productos on (productos_transaccion.pt_producto_id = productos.producto_id)  WHERE pt_transaccion_id = ?", id)
+    subtotal = db.execute("SELECT SUM(pt_monto_producto) FROM productos_transaccion where pt_transaccion_id = ?", id)[0]["SUM(pt_monto_producto)"]
+
+    print(transaction)
+    print(productos)
+
+    # gotta render the template with the values in my variables
+
+    return render_template("show_transaction.html", id=id, transaction=transaction, productos=productos, subtotal=subtotal)
+
 
 @app.route("/logout")
 def logout():
